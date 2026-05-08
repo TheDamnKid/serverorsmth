@@ -1,29 +1,36 @@
 const express = require('express');
+const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const quotes = [
-  "Logic will get you from A to B. Imagination will take you everywhere.",
-  "Better late than never, but never late is better.",
-  "Code is like humor. When you have to explain it, it’s bad.",
-  "Simplicity is the soul of efficiency."
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+app.use(express.static(path.join(__dirname, 'public')));
+
+// News reports including the requested "67 Kid" story
+const newsReports = [
+  { 
+    id: 1, 
+    title: "Tragedy or Hoax? The '67 Kid' Death Reports Explained", 
+    content: "Reports have flooded social media claiming that the '67 Kid' has died. While viral videos suggest a tragic end for the meme icon, recent updates confirm the creator is safe and these claims are likely part of an internet hoax." 
+  },
+  { 
+    id: 2, 
+    title: "Viral '67' Meme Declared 'Dead' by Gen Alpha", 
+    content: "The infamous '67' catchphrase has officially been labeled as 'brainrot' by its own community, with many declaring the meme itself is now 'dead' after its peak in late 2025." 
+  }
 ];
 
 app.get('/', (req, res) => {
-  const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-  res.send(`
-    <html>
-      <body style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; font-family:sans-serif; background:#f4f4f9;">
-        <h1 style="color:#333;">Daily Inspiration</h1>
-        <p style="font-size:1.5rem; font-style:italic; color:#555; text-align:center; max-width:600px;">
-          "${randomQuote}"
-        </p>
-        <button onclick="location.reload()" style="padding:10px 20px; cursor:pointer; background:#007bff; color:white; border:none; border-radius:5px;">New Quote</button>
-      </body>
-    </html>
-  `);
+  res.render('index', { reports: newsReports });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.get('/report/:id', (req, res) => {
+  const report = newsReports.find(r => r.id === parseInt(req.params.id));
+  if (!report) return res.status(404).send('Article not found');
+  res.render('report', { report });
+});
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`News portal live at http://0.0.0:${PORT}`);
 });
